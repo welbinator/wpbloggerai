@@ -15,13 +15,17 @@ function wpblogger_create_blog_post() {
 
     $api_key = esc_attr(get_option('wpblogger_api_key'));
     $blog_title = sanitize_text_field($_POST['wpblogger_blog_title']);
-    $keyword = isset($_POST['wpblogger_keyword']) ? sanitize_text_field($_POST['wpblogger_keyword']) : '';
+    $blog_content = sanitize_text_field($_POST['wpblogger_blog_content']);
+    $keyword = isset($_POST['wpblogger_keyword']) ? array_map('trim', explode(',', sanitize_text_field($_POST['wpblogger_keyword']))) : array();
 
-    $prompt = 'What\'s the blog post about? ' . $blog_title;
+
+    $prompt = 'Write a blog post with the title of: ' . $blog_title . 'and make the blog post about ' . $blog_content;
     
     if (!empty($keyword)) {
-        $prompt .= ' Try to use ' . $keyword . ' in the content at least 3 times.';
+        $keywords_string = implode(', ', $keyword);
+        $prompt .= ' Try to use ' . $keywords_string . ' in the content at least once.';
     }
+    
 
     // Call the ChatGPT API with the given API key and prompt, and create a draft post with the returned content.
     $client = new Client([

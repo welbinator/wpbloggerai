@@ -54,10 +54,10 @@ function wpblogger_create_blog_post_page() {
 
                 <tr>
                     <th scope="row">
-                        <label for="wpblogger_system_message">What's the blog post about?</label>
+                        <label for="wpblogger_blog_content">What's the blog post about?</label>
                     </th>
                     <td>
-                        <textarea name="wpblogger_system_message" id="wpblogger_system_message" rows="3" class="large-text"></textarea>
+                        <textarea name="wpblogger_blog_content" id="wpblogger_blog_content" rows="3" class="large-text"></textarea>
                     </td>
                 </tr>
             </table>
