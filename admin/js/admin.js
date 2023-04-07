@@ -22,5 +22,32 @@ jQuery(document).ready(function($) {
                 },
             });
         });
-    }
+    };
+
+    $('#wpblogger_seo_audit').on('click', function(e) {
+        e.preventDefault();
+
+        let postId = $('#wpblogger_posts').val();
+
+        $.ajax({
+            url: wpblogger_ajax_obj.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'wpblogger_perform_seo_audit',
+                post_id: postId,
+            },
+            async: false,
+            success: function(response) {
+                $('#wpblogger_seo_audit_result').html(response);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error: ' + status + ' ' + error + ' ' + xhr.responseText);
+            },
+        });
+    });
 });
+
+
+
+    
+

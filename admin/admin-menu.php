@@ -2,7 +2,8 @@
 function wpblogger_add_menu_pages() {
     add_menu_page('WP Blogger Settings', 'WP Blogger', 'manage_options', 'wpblogger-settings', 'wpblogger_settings_page');
     add_submenu_page('wpblogger-settings', 'API Key', 'API Key', 'manage_options', 'wpblogger-api-key', 'wpblogger_api_key_page');
-    add_submenu_page('wpblogger-settings', 'Create Blog Post', 'Create Blog Post', 'manage_options', 'wpblogger-create-blog-post', 'wpblogger_create_blog_post_page');
+    add_submenu_page('wpblogger-settings', 'Blogger Tools', 'Blogger Tools', 'manage_options', 'wpblogger-blogger-tools', 'wpblogger_blogger_tools_page');
+
 }
 
 add_action('admin_menu', 'wpblogger_add_menu_pages');
@@ -27,10 +28,19 @@ function wpblogger_api_key_page() {
     <?php
 }
 
-function wpblogger_create_blog_post_page() {
+function wpblogger_blogger_tools_page() {
+    $args = array(
+        'post_type' => 'post',
+        'post_status' => 'publish',
+        'posts_per_page' => -1,
+        'orderby' => 'title',
+        'order' => 'ASC',
+    );
+    $posts_query = new WP_Query($args);
     ?>
     <div class="wrap">
-        <h1>Create Blog Post</h1>
+        <h1>Blogger Tools</h1>
+        <h2>Create Blog Post</h2>
         <form id="wpblogger-create-post-form" method="post">
             <?php wp_nonce_field('wpblogger_create_blog_post', 'wpblogger_nonce'); ?>
             <table class="form-table">
@@ -50,22 +60,36 @@ function wpblogger_create_blog_post_page() {
                         <input type="text" name="wpblogger_keyword" id="wpblogger_keyword" class="regular-text" />
                     </td>
                 </tr>
-
-
                 <tr>
                     <th scope="row">
-                        <label for="wpblogger_blog_content">What's the blog post about?</label>
+                        <label for="wpblogger_system_message">What's the blog post about?</label>
                     </th>
                     <td>
-                        <textarea name="wpblogger_blog_content" id="wpblogger_blog_content" rows="3" class="large-text"></textarea>
+                        <textarea name="wpblogger_system_message" id="wpblogger_system_message" rows="3" class="large-text"></textarea>
                     </td>
                 </tr>
             </table>
             <input type="submit" name="submit" id="submit" class="button button-primary" value="Create Blog Post" />
         </form>
+        <h2>Perform SEO Audit</h2>
+        <div class="wpblogger-seo-audit">
+            <label for="wpblogger_posts">Select a Blog Post:</label>
+            <select id="wpblogger_posts">
+                <?php
+                while ($posts_query->have_posts()) {
+                    $posts_query->the_post();
+                    echo '<option value="' . get_the_ID() . '">' . get_the_title() . '</option>';
+                }
+                wp_reset_postdata();
+                ?>
+            </select>
+            <button id="wpblogger_seo_audit" class="button button-primary">Perform SEO Audit</button>
+            <div id="wpblogger_seo_audit_result"></div>
+        </div>
     </div>
     <?php
 }
+
 
 
 

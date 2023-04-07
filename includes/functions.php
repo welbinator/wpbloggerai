@@ -105,3 +105,58 @@ function wpblogger_save_api_key() {
 
 add_action('wp_ajax_wpblogger_create_blog_post', 'wpblogger_create_blog_post');
 
+//create new AJAX handler for post SEO audit
+function wpblogger_perform_seo_audit() {
+    if (!isset($_POST['post_id']) || !current_user_can('edit_posts')) {
+        wp_send_json_error('Unauthorized request');
+    }
+
+    $post_id = intval($_POST['post_id']);
+    $post_content = get_post_field('post_content', $post_id);
+
+    $api_key = esc_attr(get_option('wpblogger_api_key'));
+    $blog_content = strip_tags($post_content);
+    $prompt = "Perform an SEO audit on the following content:\n" . $blog_content;
+    
+    $client = new Client([
+        'base_uri' => 'https://api.openai.com/',
+        'headers' => [
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer ' . $api_key,
+        ],
+    ]);
+    
+    $params = [
+        'model' => 'gpt-3.5-turbo',
+        'messages' => [
+            [
+                'role' => 'system',
+                'content' => $prompt,
+            ],
+        ],
+    ];
+    
+    try {
+        $response = $client->post('v1/chat/completions', [
+            'json' => $params,
+        ]);
+    
+        if ($response->getStatusCode() == 200) {
+            $data = json_decode($response->getBody());
+            $seo_audit_result = $data->choices[0]->message->content;
+            echo wp_kses_post($seo_audit_result);
+        } else {
+            wp_die('Error calling the ChatGPT API.');
+        }
+    } catch (RequestException $e) {
+        wp_die('Error calling the ChatGPT API: ' . $e->getMessage());
+    }
+
+    
+    // echo wp_kses_post("Generating your SEO Audit now...");
+
+    wp_die();
+}
+
+add_action('wp_ajax_wpblogger_perform_seo_audit', 'wpblogger_perform_seo_audit');
+
